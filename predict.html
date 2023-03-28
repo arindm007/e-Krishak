@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>E Krishak - Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Use the power of Machine Learning to determine the usefulness of pests."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+      integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="icon" type="image/png" href="img/Favicon2.png" />
+    <link rel="stylesheet" href="style/styles.css" />
+    <style>
+      body {
+        min-height: 75rem;
+        padding-top: 4.5rem;
+      }
+
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-custom navbar-expand-md fixed-top">
+      <a class="navbar-brand" href="index.html"
+        ><img src="img\logo-no-background.png" id="nav-logo"
+      /></a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarCollapse"
+        aria-controls="navbarCollapse"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <li>
+          <a class=" nav-link" href="index.html">Home</a>
+        </li>
+        <li>
+          <a class="nav-link" href="about.html">About Us</a>
+        </li>
+        <li>
+          <a class="nav-link" href="pesticides.html">Info on Pesticides</a>
+        </li>
+        <li>
+          <a class="nav-link" href="Firebase.html">Firebase Data</a>
+        </li>
+        <li>
+          <a class="nav-link" href="predict.html">Prediction Data</a>
+        </li>
+      </div>
+    </nav>
+    <br>
+    
+
+    <div class="container mt-3">
+      <table class="table table-dark">
+          <thead>
+              <th>Crop Predicted</th>
+          </thead>
+  
+          <tbody id="tbody2"> </tbody>
+      </table>
+  </div>
+
+
+
+
+<!-- <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js"></script> -->
+<!-- <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-auth.js"></script>  -->
+<!-- <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-database.js"></script>   -->
+
+<script type="module">
+// -----------------------Filling The Table------------------
+      var stdNo=0;
+      var tbody = document.getElementById('tbody2');
+
+      function AddItemsToTable(crop){
+          var trow = document.createElement('tr');
+          var td1 = document.createElement('td');
+          var td2 = document.createElement('td');
+
+        
+          td1.innerHTML = ++stdNo;
+          td2.innerHTML = crop;
+
+
+          trow.appendChild(td1);
+          trow.appendChild(td2);
+
+          tbody.appendChild(trow);
+      }
+
+      function AddAllItemsToTable(croppredicted){
+          stdNo=0;
+          tbody.innerHTML="";
+          croppredicted.forEach(element => {
+              AddItemsToTable(element.crop);
+          });
+      }
+
+      
+// --------------------------configuration----------------------------------        
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBVPy2Cdnv-3LE39Fu0BvrT5DUIvKwGWdk",
+  authDomain: "e-krishak-86c3d.firebaseapp.com",
+  databaseURL: "https://e-krishak-86c3d-default-rtdb.firebaseio.com",
+  projectId: "e-krishak-86c3d",
+  storageBucket: "e-krishak-86c3d.appspot.com",
+  messagingSenderId: "804642205293",
+  appId: "1:804642205293:web:f11fcc8f37fb32a0bdd964",
+  // measurementId: "G-C8QXPCV9W1"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
+import {getDatabase,ref,child,onValue,get}
+from "https://www.gstatic.com/firebasejs/9.18.0/firebase-database.js"
+
+
+const db = getDatabase();
+
+
+// -----------------------------Get-All Data-------------------------------
+
+  function GetAllDataOnce(){
+      const dbRef = ref(db);
+
+      get(child(dbRef, "croppredicted"))
+      .then((snapshot)=>{
+          var weather = [];
+
+          snapshot.forEach(childSnapshot => {
+              weather.push(childSnapshot.val());
+          });
+
+          AddAllItemsToTable(weather);
+
+  });
+  }
+
+  function GetAllDataRealtime(){
+      const dbRef = ref(db,"croppredicted");
+
+      onValue(dbRef,(snapshot)=>{
+          var weather = [];
+
+          snapshot.forEach(childSnapshot => {
+              weather.push(childSnapshot.val());
+          
+          });
+
+          AddAllItemsToTable(weather);
+
+      })
+  }
+  window.onload=GetAllDataRealtime;
+
+  </script>
+
+    
+
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <h4>About Us</h4>
+            <p>
+              
+                E Krishak is a free, innovative tool to help farmers maximize their
+              yields and make their pesticide use more effective.
+            </p>
+          </div>
+          <div class="col-md-4">
+            <h4>Contact Us</h4>
+            <p>
+              O.P Jindal University<br />
+              <b>TEAM :     e-Krishak</b><br />
+              <b>Email:</b>  ekrishak@gmail.com <br />
+              <b>Members:</b> <br />
+                       Arindam Chakraborty - +91-9981257969<br />
+                       Soumya Mittal       - +91-9753721777<br />
+                       Manish Gupta        - +91-9131391650<br />
+                       Aditya Agrawal      - +91-8109289977<br />
+            
+              
+            </p>
+          </div>
+          <div class="col-md-4">
+            <h4>Follow Us</h4>
+            <ul class="list-inline">
+              <li>
+                <a href="https://www.facebook.com"
+                  ><i class="fa-brands fa-facebook"></i
+                ></a>
+              </li>
+              <li>
+                <a href="https://twitter.com"
+                  ><i class="fa-brands fa-twitter"></i
+                ></a>
+              </li>
+              <li>
+                <a href="https://www.instagram.com"
+                  ><i class="fa-brands fa-instagram"></i
+                ></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
